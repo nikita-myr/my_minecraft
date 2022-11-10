@@ -16,6 +16,7 @@ class Texture_manager:
 		gl.glGenTextures(1, self.texture_array)
 		gl.glBindTexture(gl.GL_TEXTURE_2D_ARRAY, self.texture_array)
 
+		gl.glTexParameteri(gl.GL_TEXTURE_2D_ARRAY, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST)
 		gl.glTexParameteri(gl.GL_TEXTURE_2D_ARRAY, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST) # disable texture filtering for magnification (return the texel that's nearest to the fragment's texture coordinate)
 
 		gl.glTexImage3D( # set the dimensions of our texture array
