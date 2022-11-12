@@ -127,6 +127,7 @@ class World:
 		lx, ly, lz = self.get_local_position(position)
 
 		self.chunks[chunk_position].blocks[lx][ly][lz] = number
+		self.chunks[chunk_position].modified = True
 		self.chunks[chunk_position].update_at_position((x, y, z))
 		self.chunks[chunk_position].update_mesh()
 

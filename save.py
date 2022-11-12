@@ -32,6 +32,35 @@ class Save:
                 for z in range(chunk.CHUNK_LENGTH):
                     self.world.chunks[chunk_position].blocks[x][y][z] = chunk_blocks[x * chunk.CHUNK_LENGTH * chunk.CHUNK_HEIGHT + z * chunk.CHUNK_HEIGHT + y]
 
+    def save_chunk(self, chunk_position):
+        x, y, z = chunk_position
+
+        chunk_path = self.chunk_position_to_path(chunk_position)
+
+        try:
+            chunk_data = nbt.load(chunk_path)
+
+        except FileNotFoundError:
+            chunk_data = nbt.File({'': nbt.Compound({'Level': nbt.Compound()})})
+
+            chunk_data['Level']['xPos'] = x 
+            chunk_data['Level']['zPos'] = z
+
+        chunk_blocks = nbt.ByteArray([0] * (chunk.CHUNK_WIDTH * chunk.CHUNK_HEIGHT * chunk.CHUNK_LENGTH))
+
+        for x in range(chunk.CHUNK_WIDTH):
+            for y in range(chunk.CHUNK_HEIGHT):
+                for z in range(chunk.CHUNK_LENGTH):
+                    chunk_blocks[x * chunk.CHUNK_LENGTH * 
+                                 chunk.CHUNK_HEIGHT + z * 
+                                 chunk.CHUNK_HEIGHT + y
+                                ] = self.world.chunks[chunk_position].blocks[x][y][z]
+
+        chunk_data['Level']['Blocks'] = chunk_blocks
+        chunk_data.save(chunk_path, gzipped= True)
+
+
+
 
 
 
@@ -39,3 +68,14 @@ class Save:
         for x in range(-4, 4):
             for z in range(-4, 4):
                 self.load_chunk((x, 0, z))
+    
+    def save(self):
+        for chunk_position in self.world.chunks:
+            if chunk_position[1] != 0:
+                continue
+
+            chunk = self.world.chunks[chunk_position]
+
+            if chunk.modified:
+                self.save_chunk(chunk_position)
+                chunk.modified = False

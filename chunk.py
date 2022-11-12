@@ -12,6 +12,7 @@ CHUNK_LENGTH = 16
 class Chunk:
 	def __init__(self, world, chunk_position):
 		self.world = world
+		self.modified = False
 		
 		self.chunk_position = chunk_position
 

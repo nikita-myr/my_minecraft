@@ -127,8 +127,10 @@ class Window(pyglet.window.Window):
 		elif key == pyglet.window.key.SPACE : self.camera.input[1] += 1
 		elif key == pyglet.window.key.LSHIFT: self.camera.input[1] -= 1
 
-		elif key -- pyglet.window.key.G : 
+		elif key == pyglet.window.key.G : 
 			self.holding = random.randint(1, len(self.world.block_types) - 1)
+		elif key == pyglet.window.key.F5: 
+			self.world.save.save()
 
 		elif key == pyglet.window.key.ESCAPE:
 			self.mouse_captured = False
