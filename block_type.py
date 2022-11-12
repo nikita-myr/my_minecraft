@@ -1,3 +1,5 @@
+import collider
+
 import models.cube # default model
 
 class Block_type:
@@ -13,6 +15,13 @@ class Block_type:
 		self.is_cube = model.is_cube
 		self.glass = model.glass
 
+		# create colliders
+
+		self.colliders = []
+
+		for _collider in model.colliders:
+			self.colliders.append(collider.Collider(*_collider))
+
 		# replace data contained in numbers.py with model specific data
 
 		self.vertex_positions = model.vertex_positions
@@ -21,6 +30,7 @@ class Block_type:
 
 		def set_block_face(face, texture):
 			# make sure we don't add inexistent faces
+
 			if face > len(self.tex_coords) - 1:
 				return
 

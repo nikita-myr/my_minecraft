@@ -1,8 +1,14 @@
-transparent = False
+transparent = True
 is_cube = True
-glass = False
+glass = True
+translucent = True
 
-colliders = []
+colliders = [
+	[
+		(-0.5, -0.5, -0.5),
+		( 0.5,  0.5,  0.5)
+	]
+]
 
 vertex_positions = [
 	[ 0.5,  0.5,  0.5,  0.5, -0.5,  0.5,  0.5, -0.5, -0.5,  0.5,  0.5, -0.5], # right
