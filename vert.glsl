@@ -2,11 +2,11 @@
 
 layout(location = 0) in vec3 vertex_position;
 layout(location = 1) in vec3 tex_coords;
-layout(location = 2) in float shading_value; // shading value attribute
+layout(location = 2) in float shading_value;
 
 out vec3 local_position;
 out vec3 interpolated_tex_coords;
-out float interpolated_shading_value; // interpolated shading value
+out float interpolated_shading_value;
 
 uniform mat4 matrix;
 

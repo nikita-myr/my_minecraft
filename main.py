@@ -1,6 +1,7 @@
 
 import math
 import ctypes
+import random
 import pyglet
 
 pyglet.options["shadow_window"] = False
@@ -12,7 +13,12 @@ import matrix
 import shader
 import camera
 
+import block_type
+import texture_manager
+
 import world
+
+import hit
 
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
@@ -30,15 +36,19 @@ class Window(pyglet.window.Window):
 
 		# pyglet stuff
 
-		pyglet.clock.schedule_interval(self.update, 1.0 / 10000) # set the update interval as small as possible
+		pyglet.clock.schedule_interval(self.update, 1.0 / 10000)
 		self.mouse_captured = False
 
 		# camera stuff
 
 		self.camera = camera.Camera(self.shader, self.width, self.height)
+
+		# misc stuff
+
+		self.holding = 7
 	
 	def update(self, delta_time):
-		print(f"FPS {1 / delta_time}") # print out the current FPS
+		# print(f"FPS: {1.0 / delta_time}")
 
 		if not self.mouse_captured:
 			self.camera.input = [0, 0, 0]
@@ -59,11 +69,11 @@ class Window(pyglet.window.Window):
 		gl.glEnable(gl.GL_DEPTH_TEST)
 		gl.glEnable(gl.GL_CULL_FACE)
 
-		gl.glClearColor(0.0, 0.0, 0.0, 1.0)
+		gl.glClearColor(0.0, 0.0, 0.0, 0.0)
 		self.clear()
 		self.world.draw()
 
-		gl.glFinish() # there seems to be a bit of a bug in Pyglet which makes this call necessary
+		gl.glFinish()
 	
 	# input functions
 
@@ -72,19 +82,38 @@ class Window(pyglet.window.Window):
 
 		self.camera.width = width
 		self.camera.height = height
-	
+
 	def on_mouse_press(self, x, y, button, modifiers):
-		self.mouse_captured = not self.mouse_captured
-		self.set_exclusive_mouse(self.mouse_captured)
+		if not self.mouse_captured:
+			self.mouse_captured = True
+			self.set_exclusive_mouse(True)
+
+			return
+
+		# handle breaking/placing blocks
+
+		def hit_callback(current_block, next_block):
+			if button == pyglet.window.mouse.RIGHT: self.world.set_block(current_block, self.holding)
+			elif button == pyglet.window.mouse.LEFT: self.world.set_block(next_block, 0)
+			elif button == pyglet.window.mouse.MIDDLE: self.holding = self.world.get_block_number(next_block)
+		
+		hit_ray = hit.Hit_ray(self.world, self.camera.rotation, self.camera.position)
+
+		while hit_ray.distance < hit.HIT_RANGE:
+			if hit_ray.step(hit_callback):
+				break
 	
 	def on_mouse_motion(self, x, y, delta_x, delta_y):
 		if self.mouse_captured:
 			sensitivity = 0.004
 
-			self.camera.rotation[0] -= delta_x * sensitivity
+			self.camera.rotation[0] += delta_x * sensitivity
 			self.camera.rotation[1] += delta_y * sensitivity
 
 			self.camera.rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.camera.rotation[1]))
+	
+	def on_mouse_drag(self, x, y, delta_x, delta_y, buttons, modifiers):
+		self.on_mouse_motion(x, y, delta_x, delta_y)
 	
 	def on_key_press(self, key, modifiers):
 		if not self.mouse_captured:
@@ -97,6 +126,13 @@ class Window(pyglet.window.Window):
 
 		elif key == pyglet.window.key.SPACE : self.camera.input[1] += 1
 		elif key == pyglet.window.key.LSHIFT: self.camera.input[1] -= 1
+
+		elif key -- pyglet.window.key.G : 
+			self.holding = random.randint(1, len(self.world.block_types) - 1)
+
+		elif key == pyglet.window.key.ESCAPE:
+			self.mouse_captured = False
+			self.set_exclusive_mouse(False)
 	
 	def on_key_release(self, key, modifiers):
 		if not self.mouse_captured:
@@ -112,7 +148,7 @@ class Window(pyglet.window.Window):
 
 class Game:
 	def __init__(self):
-		self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16) # add depth_size = 16 because pyglet makes a 24 bit depth buffer by default, which isn't supported on some hardware
+		self.config = gl.Config(major_version = 3, minor_version = 3, depth_size = 16)
 		self.window = Window(config = self.config, width = 800, height = 600, caption = "Minecraft clone", resizable = True, vsync = False)
 	
 	def run(self):
